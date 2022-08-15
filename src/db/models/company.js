@@ -4,7 +4,7 @@ module.exports = class Company extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        companyName: {
+        company_name: {
           type: Sequelize.STRING(15),
           allowNull: false,
           unique: true,
@@ -17,19 +17,19 @@ module.exports = class Company extends Sequelize.Model {
           type: Sequelize.STRING(15),
           allowNull: false,
         },
-        companyAddress: {
+        company_address: {
           type: Sequelize.STRING(45),
           allowNull: false,
         },
-        companyIntroduction: {
+        company_introduction: {
           type: Sequelize.STRING(100),
           allowNull: false,
         },
-        companyEmail: {
+        company_email: {
           type: Sequelize.STRING(15),
           allowNull: false,
         },
-        companyContact: {
+        company_contact: {
           type: Sequelize.STRING(15),
           allowNull: false,
         },
@@ -53,7 +53,7 @@ module.exports = class Company extends Sequelize.Model {
   }
   static associate(db) {
     db.Company.hasMany(db.Recruitment, {
-      foreignKey: 'companyId',
+      foreignKey: 'company_id',
       suorceKey: 'id',
     });
   }

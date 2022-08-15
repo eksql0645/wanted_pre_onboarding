@@ -4,7 +4,7 @@ module.exports = class Recruitment extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        companyId: {
+        company_id: {
           type: Sequelize.INTEGER,
           allowNull: false,
         },
@@ -44,7 +44,7 @@ module.exports = class Recruitment extends Sequelize.Model {
   }
   static associate(db) {
     db.Recruitment.belongsTo(db.Company, {
-      foreignKey: 'companyId',
+      foreignKey: 'company_id',
       targetKey: 'id',
     });
   }
