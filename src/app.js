@@ -1,12 +1,8 @@
 const express = require('express');
 const app = express();
-const dotenv = require('dotenv');
 const morgan = require('morgan');
 
-dotenv.config();
-
-// 개발용 로그 출력const dotenv = require('dotenv');
-
+// 개발용 로그 출력
 app.use(morgan('dev'));
 
 // 에러 미들웨어
