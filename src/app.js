@@ -6,7 +6,11 @@ const recruitmentRouter = require('./routers/recruitment-router');
 // 개발용 로그 출력
 app.use(morgan('dev'));
 
-app.use('/api/recruit', recruitmentRouter);
+// body-parser
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.use('/recruitment', recruitmentRouter);
 
 // 에러 미들웨어
 app.use((err, req, res, next) => {
