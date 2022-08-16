@@ -144,6 +144,7 @@ recruitmentRouter.patch('/:id', async (req, res, next) => {
 recruitmentRouter.delete('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
+    let result = '';
 
     // 채용공고가 존재하는지 확인
     let recruitment = await Recruitment.findOne({ where: { id } });
@@ -155,7 +156,12 @@ recruitmentRouter.delete('/:id', async (req, res, next) => {
     // 채용 공고 삭제
     recruitment = await Recruitment.destroy({ where: { id } });
 
-    res.status(200).json(recruitment);
+    // 채용 공고 삭제 성공 시 삭제 알림
+    if (recruitment === 1) {
+      result = '채용 공고가 삭제되었습니다.';
+    }
+
+    res.status(200).json(result);
   } catch (e) {
     next(e);
   }
