@@ -33,11 +33,6 @@ module.exports = class Company extends Sequelize.Model {
           type: Sequelize.STRING(15),
           allowNull: false,
         },
-        created_at: {
-          type: Sequelize.DATE,
-          allowNull: true,
-          defaultValue: Sequelize.NOW,
-        },
       },
       {
         sequelize,
