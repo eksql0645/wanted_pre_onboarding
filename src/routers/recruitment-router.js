@@ -4,7 +4,7 @@ const Company = require('../db/models/company');
 const recruitmentRouter = Router();
 
 // 채용공고 등록
-recruitmentRouter.post('/register', async (req, res, next) => {
+recruitmentRouter.post('/', async (req, res, next) => {
   try {
     const { company_id, position, compensation, content, stack } = req.body;
 
@@ -47,6 +47,14 @@ recruitmentRouter.post('/register', async (req, res, next) => {
 // 채용공고 목록 조회
 recruitmentRouter.get('/', async (req, res, next) => {
   try {
+    const recruitmentList = await Recruitment.findAll({});
+
+    // 채용공고가 없는 경우
+    if (recruitmentList.length === 0) {
+      throw new Error('채용 공고가 존재하지 않습니다.');
+    }
+
+    res.status(200).json(recruitmentList);
   } catch (e) {
     next(e);
   }
