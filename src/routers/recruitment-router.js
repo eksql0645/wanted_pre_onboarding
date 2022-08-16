@@ -47,37 +47,64 @@ recruitmentRouter.post('/', async (req, res, next) => {
 // 채용공고 목록 조회
 recruitmentRouter.get('/', async (req, res, next) => {
   try {
-    // 회사ID로 회사명, 국가, 지역 가져오기
-    const recruitmentsList = await Recruitment.findAll({
+    const recruitmentList = await Recruitment.findAll({
+      // 회사ID로 회사명, 국가, 지역 가져오기
       include: [
         { model: Company, attributes: ['company_name', 'nation', 'city'] },
       ],
       raw: true,
+      // 필요한 필드만 추출
       attributes: ['id', 'position', 'compensation', 'stack'],
     });
 
     // 채용공고가 없는 경우
-    if (recruitmentsList.length === 0) {
+    if (recruitmentList.length === 0) {
       throw new Error('채용 공고가 존재하지 않습니다.');
     }
 
-    res.status(200).json(recruitmentsList);
+    res.status(200).json(recruitmentList);
   } catch (e) {
     next(e);
   }
 });
 
-// 채용공고 상세페이지 / 회사명, 국가, 지역, 채용내용, 회사가 올린 다른 채용공고
+// 채용공고 상세페이지
 recruitmentRouter.get('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
 
     // 채용공고가 존재하는지 확인
-    const recruitment = await Recruitment.findOne({ id });
-
+    let recruitment = await Recruitment.findOne({ where: { id } });
     if (!recruitment) {
       throw new Error('해당 채용공고가 존재하지 않습니다.');
     }
+
+    // 채용공고가 존재한다면 그 채용공고에 등록된 company_id 추출
+    const company_id = recruitment.company_id;
+
+    // 채용공고 가져오기
+    recruitment = await Recruitment.findOne({
+      include: [
+        { model: Company, attributes: ['company_name', 'nation', 'city'] },
+      ],
+      raw: true,
+      where: { id },
+      attributes: ['id', 'position', 'compensation', 'stack', 'content'],
+    });
+
+    // 회사가 올린 채용공고 목록 가져오기
+    const company = await Company.findOne({
+      include: [{ model: Recruitment }],
+      where: { id: company_id },
+    });
+
+    const recruitList = await company.getRecruitments();
+
+    // recruitList에서 id만 추출
+    const recruitmentListOfcompany = recruitList.map((e) => e.id);
+
+    // recruitment에 회사가 올린 채용공고 목록 추가
+    recruitment.recruitmentListOfcompany = recruitmentListOfcompany;
 
     res.status(200).json(recruitment);
   } catch (e) {
