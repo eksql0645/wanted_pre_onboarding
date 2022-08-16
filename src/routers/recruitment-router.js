@@ -2,6 +2,7 @@ const { Router } = require('express');
 const Recruitment = require('../db/models/recruitment');
 const Company = require('../db/models/company');
 const recruitmentRouter = Router();
+const { Op } = require('sequelize');
 
 // 채용공고 등록
 recruitmentRouter.post('/', async (req, res, next) => {
@@ -63,6 +64,46 @@ recruitmentRouter.get('/', async (req, res, next) => {
     }
 
     res.status(200).json(recruitmentList);
+  } catch (e) {
+    next(e);
+  }
+});
+
+// 채용공고 검색 조회
+recruitmentRouter.get('/search', async (req, res, next) => {
+  try {
+    // 쿼리스트링으로 입력된 키워드 가져오기
+    const { keyword } = req.query;
+
+    // position, content, stack에서 유사검색하기
+    const result = await Recruitment.findAll({
+      where: {
+        [Op.or]: [
+          {
+            position: {
+              [Op.like]: `%${keyword}%`,
+            },
+          },
+          {
+            content: {
+              [Op.like]: `%${keyword}%`,
+            },
+          },
+          {
+            stack: {
+              [Op.like]: `%${keyword}%`,
+            },
+          },
+        ],
+      },
+    });
+
+    // 일치하는 데이터가 없는 경우
+    if (result.length === 0) {
+      throw new Error('일치하는 공고가 존재하지 않습니다.');
+    }
+
+    res.status(200).json(result);
   } catch (e) {
     next(e);
   }
