@@ -20,13 +20,13 @@ recruitmentRouter.post('/register', async (req, res, next) => {
       throw new Error('존재하지 않는 회사입니다. 다시 확인해주세요.');
     }
 
-    // 중복 공고 생성 방지
+    // 중복 공고 생성 방지 / findAll은 배열을 반환한다.
     const isDuplicated = await Recruitment.findAll({
       where: { company_id, position },
     });
 
-    if (isDuplicated) {
-      throw new Error('이미 등록된 공고입니다.');
+    if (isDuplicated.length > 0) {
+      throw new Error('이미 등록된 포지션 공고입니다.');
     }
 
     // 채용공고 생성
@@ -40,7 +40,6 @@ recruitmentRouter.post('/register', async (req, res, next) => {
 
     res.status(201).json(recruitment);
   } catch (e) {
-    console.log(e);
     next(e);
   }
 });
