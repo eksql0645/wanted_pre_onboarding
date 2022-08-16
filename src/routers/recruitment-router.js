@@ -113,8 +113,28 @@ recruitmentRouter.get('/:id', async (req, res, next) => {
 });
 
 // 채용공고 수정
-recruitmentRouter.patch('/', async (req, res, next) => {
+recruitmentRouter.patch('/:id', async (req, res, next) => {
   try {
+    const { id } = req.params;
+    const { position, compensation, content, stack } = req.body;
+
+    // 채용공고가 존재하는지 확인
+    let recruitment = await Recruitment.findOne({ where: { id } });
+
+    if (!recruitment) {
+      throw new Error('채용공고가 존재하지 않습니다.');
+    }
+
+    // 수정하기
+    recruitment = await Recruitment.update(
+      { position, compensation, content, stack },
+      { where: { id } }
+    );
+
+    // 수정 데이터 가져오기
+    recruitment = await Recruitment.findOne({ where: { id } });
+
+    res.status(200).json(recruitment);
   } catch (e) {
     next(e);
   }
