@@ -41,6 +41,10 @@ module.exports = class Recruitment extends Sequelize.Model {
     db.Recruitment.belongsTo(db.Company, {
       foreignKey: 'company_id',
       targetKey: 'id',
-    });
+    }),
+      db.Recruitment.hasMany(db.Applicant, {
+        foreignKey: 'recruitment_id',
+        sourceKey: 'id',
+      });
   }
 };
