@@ -3,19 +3,21 @@ const Recruitment = require('../db/models/recruitment');
 const Company = require('../db/models/company');
 const recruitmentRouter = Router();
 const { Op } = require('sequelize');
+const Applicant = require('../db/models/applicant');
+const User = require('../db/models/user');
 
 // 채용공고 등록
 recruitmentRouter.post('/', async (req, res, next) => {
   try {
-    const { company_id, position, compensation, content, stack } = req.body;
+    const { companyId, position, compensation, content, stack } = req.body;
 
     // 빈값 확인
-    if (!company_id || !position || !compensation || !content || !stack) {
+    if (!companyId || !position || !compensation || !content || !stack) {
       throw new Error('빈값을 채워주세요.');
     }
 
     // 회사가 존재하는지 획인
-    const isCompany = await Company.findOne({ where: { id: company_id } });
+    const isCompany = await Company.findOne({ where: { id: companyId } });
 
     if (!isCompany) {
       throw new Error('존재하지 않는 회사입니다. 다시 확인해주세요.');
@@ -23,7 +25,7 @@ recruitmentRouter.post('/', async (req, res, next) => {
 
     // 중복 공고 생성 방지 / findAll은 배열을 반환한다.
     const isDuplicated = await Recruitment.findAll({
-      where: { company_id, position },
+      where: { company_id: companyId, position },
     });
 
     if (isDuplicated.length > 0) {
@@ -32,7 +34,7 @@ recruitmentRouter.post('/', async (req, res, next) => {
 
     // 채용공고 생성
     const recruitment = await Recruitment.create({
-      company_id,
+      company_id: companyId,
       position,
       compensation,
       content,
@@ -40,6 +42,46 @@ recruitmentRouter.post('/', async (req, res, next) => {
     });
 
     res.status(201).json(recruitment);
+  } catch (e) {
+    next(e);
+  }
+});
+
+// 사용자의 채용공고 지원
+recruitmentRouter.post('/applicant', async (req, res, next) => {
+  try {
+    const { applicantId, recruitmentId } = req.body;
+
+    // 지원정보 유무 확인
+    if (!applicantId || !recruitmentId) {
+      throw new Error('지원정보를 입력해주세요.');
+    }
+
+    // 지원자, 채용공고 존재 확인
+    const isApplicant = await User.findOne({ where: { id: applicantId } });
+    const isRecruitment = await Recruitment.findOne({
+      where: { id: recruitmentId },
+    });
+
+    if (!isApplicant || !isRecruitment) {
+      throw new Error('채용 정보가 잘못되었습니다.');
+    }
+
+    // 채용공고에 지원했는지 확인
+    const isApplied = await Applicant.findOne({
+      where: { applicant_id: applicantId, recruitment_id: recruitmentId },
+    });
+
+    if (isApplied) {
+      throw new Error('이미 해당 채용공고에 지원하셨습니다.');
+    }
+
+    // 채용공고 지원
+    const applicant = await Applicant.create({
+      applicant_id: applicantId,
+      recruitment_id: recruitmentId,
+    });
+    res.status(201).json(applicant);
   } catch (e) {
     next(e);
   }
@@ -121,7 +163,7 @@ recruitmentRouter.get('/:id', async (req, res, next) => {
     }
 
     // 채용공고가 존재한다면 그 채용공고에 등록된 company_id 추출
-    const company_id = recruitment.company_id;
+    const companyId = recruitment.company_id;
 
     // 채용공고 가져오기
     recruitment = await Recruitment.findOne({
@@ -136,7 +178,7 @@ recruitmentRouter.get('/:id', async (req, res, next) => {
     // 회사가 올린 채용공고 목록 가져오기
     const company = await Company.findOne({
       include: [{ model: Recruitment }],
-      where: { id: company_id },
+      where: { id: companyId },
     });
 
     const recruitList = await company.getRecruitments();
