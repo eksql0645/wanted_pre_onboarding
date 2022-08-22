@@ -1,21 +1,15 @@
 const Sequelize = require('sequelize');
 
-module.exports = class User extends Sequelize.Model {
+module.exports = class Applicant extends Sequelize.Model {
   static init(sequelize) {
     return super.init(
       {
-        name: {
-          type: Sequelize.STRING(15),
+        applicant_id: {
+          type: Sequelize.INTEGER,
           allowNull: false,
-          unique: true,
         },
-        email: {
-          type: Sequelize.STRING(15),
-          allowNull: false,
-          unique: true,
-        },
-        contact: {
-          type: Sequelize.STRING(15),
+        recruitment_id: {
+          type: Sequelize.INTEGER,
           allowNull: false,
         },
       },
@@ -23,8 +17,8 @@ module.exports = class User extends Sequelize.Model {
         sequelize,
         timestamps: false,
         underscored: false,
-        modelName: 'User',
-        tableName: 'users_tb',
+        modelName: 'Applicant',
+        tableName: 'applicants_tb',
         paranoid: false,
         charset: 'utf8',
         collate: 'utf8_general_ci',
@@ -32,9 +26,13 @@ module.exports = class User extends Sequelize.Model {
     );
   }
   static associate(db) {
-    db.User.hasMany(db.Applicant, {
+    db.Applicant.belongsTo(db.User, {
       foreignKey: 'applicant_id',
-      sourceKey: 'id',
-    });
+      targetKey: 'id',
+    }),
+      db.Applicant.belongsTo(db.Recruitment, {
+        foreignKey: 'recruitment_id',
+        targetKey: 'id',
+      });
   }
 };
